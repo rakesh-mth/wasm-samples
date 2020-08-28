@@ -1,0 +1,57 @@
+<!doctype html>
+
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <title>WASM compileStreaming() test</title>
+  </head>
+
+  <body>
+    <script>
+      function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+      var logFromJS = function(arg) {
+        console.log(arg) 
+      };
+
+      var webAssemblyLoader = (function(){ 
+        var callback, savedWebModule, savedWebInstance;
+        return {
+          ready: function(cb) { callback = cb; },
+          instantiateWasm: function(info, successCallback) {
+            console.log('instantiateWasm: instantiating asynchronously');
+            WebAssembly.compileStreaming(fetch('out/browser/example.wasm'))
+            .then(function(module) { 
+              savedWebModule = module;
+              info.env.logFromJS = logFromJS;
+              return WebAssembly.instantiate(module, info)
+            })
+            .then(function(instance) {
+              savedWebInstance = instance;
+              successCallback(instance);
+              //module is ready by now, can call exported functions
+              if(callback)
+                callback(savedWebModule, savedWebInstance);
+            })
+            .catch(function(e) {console.log('wasm instantiation failed! ' + e);});
+            return {}; // Compiling asynchronously, no exports.
+          }
+        }
+      })();
+
+      var Module = { instantiateWasm: webAssemblyLoader.instantiateWasm };
+      webAssemblyLoader.ready((webModule, webInstance) => console.log(Module.returnVectorData()));
+
+      var script = document.createElement('script');
+      script.src = "out/browser/example.js";
+      document.body.appendChild(script);
+
+      (async function() {
+        await sleep(1000);
+      })();
+    </script>
+  </body>
+
+</html>
