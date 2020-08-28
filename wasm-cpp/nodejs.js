@@ -4,10 +4,21 @@ const example = require('./out/nodejs/example.js');
 
 var module;
 
-var logFromJS = function(log) {
+var LogFromJS = function(log) {
     var res = new Uint8Array(module.HEAPU8.subarray(log, log+5));
     var strMsg = String.fromCharCode.apply(null, res);
     console.log(strMsg);
+}
+
+var Draw = function(point, rect) {
+    var x = module.getValue(point, 'i32', true);
+    var y = module.getValue(point + 4, 'i32', true);
+    console.log(`x: ${x}, y: ${y}`);
+    var pointArray = new Int32Array(module.HEAP32.buffer, point, 2);
+    console.log(`x: ${pointArray[0]}, y: ${pointArray[1]} `);
+    var rectArray = new Int32Array(module.HEAP32.buffer, rect, 4);
+    console.log(`rect is ${rectArray}`)
+    return true;
 }
 
 var readFile = function(filename, binary) {
@@ -19,7 +30,8 @@ var readFile = function(filename, binary) {
 module = {
     instantiateWasm: function(info, receiveInstance) {
         var binary = readFile('out/nodejs/example.wasm', true); //fetch('example.wasm') does not work
-        info.env.logFromJS = logFromJS;
+        info.env.LogFromJS = LogFromJS;
+        info.env.Draw = Draw;
         var wasmInstantiate = WebAssembly.instantiate(binary, info).then(function(output) {
             console.log('wasm instantiation succeeded');
             receiveInstance(output.instance);

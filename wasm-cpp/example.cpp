@@ -1,4 +1,5 @@
 #include <emscripten/bind.h>
+#include <iostream>
 #include <string>
 #include <vector>
 #include <map>
@@ -6,16 +7,22 @@
 
 using namespace emscripten;
 
-extern "C" void logFromJS(std::string str);
-
-class TW_INSTANCE {
-    public:
-        int instanceId = 0;
+struct Point  {
+  int32_t x, y;
 };
+struct Rect {
+  int32_t left, top, right, bottom;
+};
+
+extern "C" bool Draw(Point* p, Rect r);;
+extern "C" void LogFromJS(std::string str);
 
 std::vector<int> returnVectorData () {
   std::vector<int> v(10, 1);
-  logFromJS("param from c++");
+  LogFromJS("param from c++");
+  Point p = {100, 200};
+  Rect rect = {250, 200, 350, 300}; 
+  std::cout << std::boolalpha << Draw(&p, rect) << std::endl;
   return v;
 }
 
@@ -29,6 +36,7 @@ std::string exclaim(std::string message)
 {
   return message + "!";
 }
+
 
 EMSCRIPTEN_BINDINGS(module) {
   function("returnVectorData", &returnVectorData);
