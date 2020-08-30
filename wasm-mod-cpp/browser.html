@@ -1,0 +1,39 @@
+<!doctype html>
+
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <title>WASM compileStreaming() test</title>
+  </head>
+
+  <body>
+    <script>
+      function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
+      var scriptLoader = document.createElement('script');
+      scriptLoader.src = "loader.js";
+      scriptLoader.onload = function() {
+        var scriptWasmBinding = document.createElement('script');
+        scriptWasmBinding.src = "out/example.js";
+        scriptWasmBinding.onload = function(){
+          var module = { instantiateWasm: WebAssemblyLoader.instantiateWasm };
+          WebAssemblyLoader.setWasmFile("out/example.wasm");
+          ImportedFunctions.setModule(module);
+          Module(module).then(function(instance) {
+            instance.returnVectorData();
+          });
+        }
+        document.body.appendChild(scriptWasmBinding);
+      };
+      document.body.appendChild(scriptLoader);
+
+      (async function() {
+        await sleep(1000);
+      })();
+    </script>
+  </body>
+
+</html>
