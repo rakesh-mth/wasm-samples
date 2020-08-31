@@ -28,11 +28,23 @@ var WebAssemblyLoader = (function(){
     var environmentIsWeb = typeof window === 'object';
     var environmenIsNode = typeof process === 'object' && typeof process.versions === 'object' && typeof process.versions.node === 'string';
     var readFile = function(filename, binary) {
-        // filename = example.locateFile(filename);
-        const path = require('path')
-        const fs = require('fs')
-        filename = path.normalize(`${__dirname}/${filename}`);
-        return fs.readFileSync(filename, binary ? null : 'utf8');
+        binary = binary || true;
+        return new Promise((resolve, reject) => {
+            const path = require('path')
+            const fs = require('fs')
+            filename = path.normalize(`${__dirname}/${filename}`);
+            fs.readFile(filename, binary ? null : 'utf8', (error, data) => {
+                if(error) return reject(error)
+                else return resolve(data)
+            });
+        });
+    };
+    var readWeb = function(filename) {
+        return new Promise((resolve, reject) => {
+            fetch(filename)
+            .then(response => response.arrayBuffer().then(arrayBuffer => resolve(arrayBuffer)))
+            .catch(error => reject(error));
+        });
     };
     return {
 
@@ -59,14 +71,10 @@ var WebAssemblyLoader = (function(){
                     console.error('wasm instantiation failed! ' + e);
                 });
             };
-            if(environmenIsNode) { 
-                compileAndInstantiateWasm(readFile(wasmFileName, true));
-            }
-            else if(environmentIsWeb) {
-                fetch(wasmFileName).then(
-                    response => response.arrayBuffer().then(arrayBuffer => compileAndInstantiateWasm(arrayBuffer))
-                );
-            }
+            var fetchCommon = environmenIsNode ? readFile : readWeb;
+            fetchCommon(wasmFileName).then(
+                arrayBuffer => compileAndInstantiateWasm(arrayBuffer)
+            );
             return {}; // Compiling asynchronously, no exports.
         }
     }
