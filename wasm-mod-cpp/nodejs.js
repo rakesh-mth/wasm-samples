@@ -7,8 +7,21 @@ var module = { instantiateWasm: loader.WebAssemblyLoader.instantiateWasm };
 loader.WebAssemblyLoader.setWasmFile('out/example.wasm');
 loader.ImportedFunctions.setModule(module);
 
-example(module).then((instance) => {
+function testArrayMul(instance) {
+    var arraySize = 10;
+    var bufOffset = instance._malloc(arraySize*4);
+    var bufView = new Int32Array(instance.HEAP32.buffer, bufOffset, arraySize);
+    for(var i = 0; i < 10; i++) {
+        bufView[i] = i * 2 + 1;
+    }
+    console.log(instance.ArrayMul(bufOffset, arraySize, 5));
+    for(var i = 0; i < 10; i++) {
+        console.log(bufView[i]);
+    }
+    instance._free(bufOffset);
+}
 
+function testVectorData(instance) {
     var retVector = instance.returnVectorData();
     // vector size
     var vectorSize = retVector.size();
@@ -22,7 +35,9 @@ example(module).then((instance) => {
     }
     // expand vector size
     retVector.resize(20, 1);
+}
 
+function testMapData(instance) {
     var retMap = instance.returnMapData();
     // map size
     var mapSize = retMap.size();
@@ -40,8 +55,18 @@ example(module).then((instance) => {
     }
     // reset the value at the given index position
     retMap.set(10, "OtherValue");
+}
 
+function testString(instance) {
     // call c++ function
     let exclaimRes = instance.exclaim("hello exclaim");
     console.log(exclaimRes);
+}
+
+example(module).then((instance) => {
+
+    testArrayMul(instance);
+    testVectorData(instance);
+    testMapData(instance);
+    testString(instance);
 });

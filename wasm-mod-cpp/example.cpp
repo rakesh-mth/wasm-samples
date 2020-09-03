@@ -37,11 +37,28 @@ std::string exclaim(std::string message)
   return message + "!";
 }
 
+bool ArrayMul(uint32_t* arr, int length, int num)
+{
+  for(int i = 0; i < length; i++) {
+    arr[i] *= num;
+  }
+  return true;
+}
+
+bool ArrayMulJs(uint32_t arrJsNumber, int length, int num)
+{
+  uint32_t* arr = (uint32_t*) arrJsNumber;
+  return ArrayMul(arr, length, num);
+}
 
 EMSCRIPTEN_BINDINGS(module) {
   function("returnVectorData", &returnVectorData);
   function("returnMapData", &returnMapData);
   function("exclaim", &exclaim);
+  function("ArrayMulJs", &ArrayMulJs, allow_raw_pointers());
+  function("ArrayMul", optional_override([](uint32_t arrJsNumber, int length, int num) {
+    return ArrayMul((uint32_t*)arrJsNumber, length, num); 
+  }));
 
   // register bindings for std::vector<int> and std::map<int, std::string>.
   register_vector<int>("vector<int>");
