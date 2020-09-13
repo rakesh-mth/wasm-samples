@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <array>
 
 using namespace emscripten;
 
@@ -12,6 +13,12 @@ struct Point  {
 };
 struct Rect {
   int32_t left, top, right, bottom;
+};
+struct Regions
+{
+    bool enabled;
+    uint8_t flags;
+    Rect rects[2];
 };
 
 extern "C" bool Draw(Point* p, Rect r);;
@@ -51,7 +58,27 @@ bool ArrayMulJs(uint32_t arrJsNumber, int length, int num)
   return ArrayMul(arr, length, num);
 }
 
+Regions TransformRegions(Regions r)
+{
+  r.enabled = false;
+  r.rects[0].left = 100;
+  r.rects[0].right = 200;
+  return r;
+}
+
 EMSCRIPTEN_BINDINGS(module) {
+  value_object<Rect>("Rect")
+      .field("left", &Rect::left)
+      .field("top", &Rect::top)
+      .field("right", &Rect::right)
+      .field("bottom", &Rect::bottom);
+  value_object<Regions>("Regions")
+      .field("enabled", &Regions::enabled)
+      .field("flags", &Regions::flags)
+      .field("rects", &Regions::rects);
+  value_array<std::array<Rect, 2>>("array_NestedRect_2")
+        .element(emscripten::index<0>())
+        .element(emscripten::index<1>());
   function("returnVectorData", &returnVectorData);
   function("returnMapData", &returnMapData);
   function("exclaim", &exclaim);
@@ -59,6 +86,7 @@ EMSCRIPTEN_BINDINGS(module) {
   function("ArrayMul", optional_override([](uint32_t arrJsNumber, int length, int num) {
     return ArrayMul((uint32_t*)arrJsNumber, length, num); 
   }));
+  function("TransformRegions", &TransformRegions);
 
   // register bindings for std::vector<int> and std::map<int, std::string>.
   register_vector<int>("vector<int>");

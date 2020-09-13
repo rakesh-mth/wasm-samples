@@ -63,10 +63,19 @@ function testString(instance) {
     console.log(exclaimRes);
 }
 
-example(module).then((instance) => {
+function testArrayInStruct(instance) {
+    var regions = {enabled: true, flags: 10, rects: [
+        { left: 10, right: 20, top: 0, bottom: 20},
+        { left: 30, right: 40, top: 10, bottom: 100} 
+    ]}
+    var regionsNew = instance.TransformRegions(regions);
+    console.log(regionsNew);
+}
 
+example(module).then((instance) => {
     testArrayMul(instance);
     testVectorData(instance);
     testMapData(instance);
     testString(instance);
+    testArrayInStruct(instance);
 });
