@@ -1,4 +1,5 @@
-const nodeFS = require('fs')
+const nodeFS = require('fs');
+const { Module } = require('module');
 const nodePath = require('path')
 const loader = require('./loader.js')
 const example = require('./out/example.js');
@@ -6,6 +7,25 @@ const example = require('./out/example.js');
 var module = { instantiateWasm: loader.WebAssemblyLoader.instantiateWasm };
 loader.WebAssemblyLoader.setWasmFile('out/example.wasm');
 loader.ImportedFunctions.setModule(module);
+
+function testClass(instance) {
+    var myClassObj = new instance.MyClass(10, "hello");
+    myClassObj.incrementX();
+    console.log(myClassObj.x);
+    var str = instance.MyClass.getStringFromInstance(myClassObj);
+    console.log(str);
+    instance.MyClass.setStringToInstance(myClassObj);
+    console.log(myClassObj.y)
+    myClassObj.delete();
+
+    var obj1 = instance.GetMyClass(); // object allocated by c++ code
+    console.log(obj1.x);
+    obj1.x = 10;
+    instance.PrintMyClass(obj1);
+    instance.MyClassSetX(obj1);
+    obj1.delete(); // this works, object deleted by JS
+    // instance.DeleteMyClass(obj1); // this works, object deleted by c++ code
+}
 
 function testArrayMul(instance) {
     var arraySize = 10;
@@ -73,6 +93,7 @@ function testArrayInStruct(instance) {
 }
 
 example(module).then((instance) => {
+    testClass(instance);
     testArrayMul(instance);
     testVectorData(instance);
     testMapData(instance);
