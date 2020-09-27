@@ -1,6 +1,7 @@
 #include <emscripten/bind.h>
 #include <iostream>
 #include <string>
+#include <memory>
 #include <vector>
 #include <map>
 #include <string>
@@ -10,7 +11,9 @@ using namespace emscripten;
 
 class MyClass {
 public:
+    MyClass() : x(0), y("empty") {}
     MyClass(int x, std::string y) : x(x), y(y){}
+    virtual ~MyClass() { printf("MyClass destructor called for %p\n", this); }
 
     void incrementX() { ++x; }
 
@@ -136,6 +139,8 @@ EMSCRIPTEN_BINDINGS(regions_export) {
 EMSCRIPTEN_BINDINGS(my_class_example) {
   class_<MyClass>("MyClass")
     .constructor<int, std::string>()
+    // .smart_ptr_constructor("std::unique_ptr<MyClass>", &std::make_unique<MyClass>) // does not work
+    .smart_ptr_constructor("std::shared_ptr<MyClass>", &std::make_shared<MyClass>)
     .function("incrementX", &MyClass::incrementX)
     .function("decrementX", &MyClassDecrementX)
     .property("x", &MyClass::getX, &MyClass::setX)

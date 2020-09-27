@@ -27,6 +27,11 @@ function testClass(instance) {
     instance.MyClassSetX(obj1, 30);
     obj1.delete(); // this works, object deleted by JS
     // instance.DeleteMyClass(obj1); // this works, object deleted by c++ code
+
+    // trying with shared ptr
+    var obj2 = new instance.MyClass();
+    console.log(obj2.x, obj2.y);
+    obj2.delete();
 }
 
 function testArrayMul(instance) {
