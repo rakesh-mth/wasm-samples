@@ -55,10 +55,11 @@ void DeleteMyClass(MyClass* pMyClass) {
 void PrintMyClass(MyClass* pMyClass) {
     printf("MyClass:: %p: %d, %s\n", pMyClass, pMyClass->getX(), pMyClass->getY().c_str());
 }
-void MyClassSetX(MyClass& myClass) {
-    myClass.setX(50);
+void MyClassSetX(MyClass& myClass, int x) {
+    myClass.setX(x);
     printf("MyClass:: %p: %d, %s\n", &myClass, myClass.getX(), myClass.getY().c_str());
 }
+void MyClassDecrementX(MyClass& myClass) { myClass.setX(myClass.getX() - 1); }
 
 std::vector<int> returnVectorData () {
   std::vector<int> v(10, 1);
@@ -136,6 +137,7 @@ EMSCRIPTEN_BINDINGS(my_class_example) {
   class_<MyClass>("MyClass")
     .constructor<int, std::string>()
     .function("incrementX", &MyClass::incrementX)
+    .function("decrementX", &MyClassDecrementX)
     .property("x", &MyClass::getX, &MyClass::setX)
     .property("y", &MyClass::getY, &MyClass::setY)
     .class_function("getStringFromInstance", &MyClass::getStringFromInstance)

@@ -12,6 +12,8 @@ function testClass(instance) {
     var myClassObj = new instance.MyClass(10, "hello");
     myClassObj.incrementX();
     console.log(myClassObj.x);
+    myClassObj.decrementX();
+    console.log(myClassObj.x);
     var str = instance.MyClass.getStringFromInstance(myClassObj);
     console.log(str);
     instance.MyClass.setStringToInstance(myClassObj);
@@ -22,7 +24,7 @@ function testClass(instance) {
     console.log(obj1.x);
     obj1.x = 10;
     instance.PrintMyClass(obj1);
-    instance.MyClassSetX(obj1);
+    instance.MyClassSetX(obj1, 30);
     obj1.delete(); // this works, object deleted by JS
     // instance.DeleteMyClass(obj1); // this works, object deleted by c++ code
 }
