@@ -8,31 +8,52 @@
   </head>
 
   <body>
+    <script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@3.4.0/dist/fetch.umd.min.js"></script> -->
     <script>
-      function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-      }
+    //   function sleep(ms) {
+    //     return new Promise(resolve => setTimeout(resolve, ms));
+    //   }
 
-      var scriptLoader = document.createElement('script');
-      scriptLoader.src = "loader.js";
-      scriptLoader.onload = function() {
-        var scriptWasmBinding = document.createElement('script');
-        scriptWasmBinding.src = "out/example.js";
-        scriptWasmBinding.onload = function(){
-          var module = { instantiateWasm: WebAssemblyLoader.instantiateWasm };
-          WebAssemblyLoader.setWasmFile("out/example.wasm");
-          ImportedFunctions.setModule(module);
-          Module(module).then(function(instance) {
-            instance.returnVectorData();
-          });
+        var webAssemblySupported = true;
+        function testWasm() {
+            var module = { instantiateWasm: WebAssemblyLoader.instantiateWasm };
+            WebAssemblyLoader.setWasmFile("out/example.wasm");
+            ImportedFunctions.setModule(module);
+            Module(module).then(function(instance) {
+                instance.returnVectorData();
+            });
         }
-        document.body.appendChild(scriptWasmBinding);
-      };
-      document.body.appendChild(scriptLoader);
 
-      (async function() {
-        await sleep(1000);
-      })();
+        function loadExample() {
+            var scriptWasmBinding = document.createElement('script');
+            scriptWasmBinding.src = "out/example.js";
+            scriptWasmBinding.onload = function(){
+                testWasm();
+            }
+            document.body.appendChild(scriptWasmBinding);
+        }
+
+        var scriptLoader = document.createElement('script');
+        scriptLoader.src = "loader.js";
+        scriptLoader.onload = function() {
+            if(typeof WebAssembly == 'undefined') {
+                webAssemblySupported = false;
+                var scriptAsm2WasmBinding = document.createElement('script');
+                scriptAsm2WasmBinding.src = "out/example.wasm.js";
+                scriptAsm2WasmBinding.onload = function(){
+                    loadExample();
+                }
+                document.body.appendChild(scriptAsm2WasmBinding);
+            } else {
+                loadExample();
+            }
+        };
+        document.body.appendChild(scriptLoader);
+
+    //   (async function() {
+    //     await sleep(1000);
+    //   })();
     </script>
   </body>
 

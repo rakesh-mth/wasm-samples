@@ -4,8 +4,8 @@ emcc example.cpp -o out/nodejs/example.js -s MODULARIZE -s EXPORTED_RUNTIME_METH
 # import function from javascript
 
 # without source map
-emcc example.cpp -o out/example.js -s EXPORTED_RUNTIME_METHODS=['ccall'] -s EXTRA_EXPORTED_RUNTIME_METHODS=['getValue'] --bind -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MODULARIZE
+emcc example.cpp -o out/example.js -s WASM=2 -s LEGACY_VM_SUPPORT=1 -s EXPORTED_RUNTIME_METHODS=['ccall'] -s EXTRA_EXPORTED_RUNTIME_METHODS=['getValue'] --bind -s ERROR_ON_UNDEFINED_SYMBOLS=0 -s MODULARIZE
 # with source map (fix source map base path)
-emcc example.cpp -o out/example.js -s EXPORTED_RUNTIME_METHODS=['ccall'] -s EXTRA_EXPORTED_RUNTIME_METHODS=['getValue'] --bind -s ERROR_ON_UNDEFINED_SYMBOLS=0 -g4 --source-map-base http://127.0.0.1:8080/ -s MODULARIZE
+emcc example.cpp -o out/example.js -s WASM=2 -s LEGACY_VM_SUPPORT=1 -s EXPORTED_RUNTIME_METHODS=['ccall'] -s EXTRA_EXPORTED_RUNTIME_METHODS=['getValue'] --bind -s ERROR_ON_UNDEFINED_SYMBOLS=0 -g4 --source-map-base http://127.0.0.1:8080/ -s MODULARIZE
 
 
